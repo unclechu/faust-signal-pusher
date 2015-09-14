@@ -3,12 +3,20 @@ declare author  "Viacheslav Lotsmanov";
 declare license "GPLv3 https://raw.githubusercontent.com/unclechu/faust-signal-pusher/master/LICENSE";
 
 import("filter.lib"); // smooth
-import("music.lib"); // db2linear
+import("music.lib");  // db2linear
+import("math.lib");   // PI
 
-push = vslider("Push[tooltip=Push level]", 0, 0, 100, 0.1)
+pushLevel = vslider("Push[tooltip=Push level]", 0, 0, 1, 0.1)
 	: smooth(0.999);
-volume = vslider("Volume[tooltip=Volume (dB)]", 0, -90, 12, 1)
+curveLevel = vslider("Curve[tooltip=Curve level]", 0, 0, 1, 0.1)
+	: smooth(0.999);
+volume = vslider("Volume[tooltip=Volume (dB)]", 0, -90, 12, 0.5)
 	: db2linear
 	: smooth(0.999);
 
-ps(s) = s *(1 +(1 - abs(s) : *( push / 100 )));
+curveFn(s) = sin( s * (PI/2) );
+
+linear = *( pushLevel : *(1 - curveLevel) );
+curve  = *( pushLevel : curveFn : curveFn : curveFn : *(curveLevel) );
+
+ps(s)  = s *(1 +(1 - abs(s) <: linear,curve : +));
