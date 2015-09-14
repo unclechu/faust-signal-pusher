@@ -12,5 +12,5 @@ volume = vslider("Volume[tooltip=Volume (dB)]", 0, -90, 12, 1)
 	: db2linear
 	: smooth(0.999);
 
-ps(s) = s *(1 +(1 - abs(s) : *( push : ^(2) : /(100) )));
+ps(s) = s *(1 +(1 - abs(s) : *( push / 100 )));
 process = ps : *(volume);
